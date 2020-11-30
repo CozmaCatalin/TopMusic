@@ -1,18 +1,22 @@
 #include <mysql/mysql.h>
-
 #include <stdio.h>
-int main() {
-	MYSQL *conn;
-	MYSQL_RES *res;
-	MYSQL_ROW row;
-	
-	char *server = "localhost";
-	char *user = "root";
-	char *password = ""; /* set me first */
-	char *database = "offlinemessenger";
-	
+
+
+#ifndef DATABASE
+#define DATABASE
+
+const char *SHOW_TABLES = "show tables";
+
+
+const char *server = "localhost";
+const char *user = "root";
+const char *password = ""; /* set me first */
+const char *database = "topmusic";
+
+MYSQL *conn;
+
+void connect_to_database(){	
 	conn = mysql_init(NULL);
-	
 	/* Connect to database */
 	if (!mysql_real_connect(conn, server, user, password, 
                                       database, 0, NULL, 0)) {
@@ -20,8 +24,17 @@ int main() {
 		exit(1);
 	}
 	
+}
+
+void close_connection(){
+	mysql_close(conn);
+}
+
+void get_tables(){
+	MYSQL_RES *res;
+	MYSQL_ROW row;
 	/* send SQL query */
-	if (mysql_query(conn, "show tables")) {
+	if (mysql_query(conn, SHOW_TABLES)) {
 		fprintf(stderr, "%s\n", mysql_error(conn));
 		exit(1);
 	}
@@ -36,5 +49,6 @@ int main() {
    
 	/* close connection */
 	mysql_free_result(res);
-	mysql_close(conn);
 }
+
+#endif

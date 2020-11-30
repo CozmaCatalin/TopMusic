@@ -64,30 +64,48 @@ int main (int argc, char *argv[]){
 
 	  //--TRIMITEREA MESAJELOR--//
 		char sendMsg[MSG_LENGTH];
+    int bytesMsgToSend;
 	    while(1){
-        scanf("%s",sendMsg);
-        if (write (sd,&sendMsg,sizeof(char)*MSG_LENGTH) <= 0){
-          perror ("[client]Eroare la write() spre server.\n");
+        fgets(sendMsg,MSG_LENGTH,stdin);
+        sendMsg[strlen(sendMsg)-1] = '\0';
+        if(strlen(sendMsg) == 0){
+          printf("Please enter an message!\n");
+          continue;
+        }
+        
+        bytesMsgToSend = sizeof(char)*strlen(sendMsg);
+
+        // SENDING MESSAGE LENGTH BYTES
+        if (write (sd,&bytesMsgToSend,sizeof(int)) <= 0){
+          perror ("[CLIENT]Eroare la write() bytes spre server.\n");
           return errno;
         }
-        bzero(sendMsg,sizeof(char)*MSG_LENGTH);
+
+        // SENDING THE MESSAGE
+        if (write (sd,&sendMsg,bytesMsgToSend) <= 0){
+          perror ("[CLIENT]Eroare la write() message spre server.\n");
+          return errno;
+        }
+
+        bzero(sendMsg,bytesMsgToSend);
    		}
 
   } else if(communications == 0){
 
 		//--PRIMIREA MESAJELOR--//
+    int bytesReceived;
+	  char msgReceived[MSG_LENGTH];
+
 		char receiveMsg[MSG_LENGTH];
-	    while(1){
-        if(read (sd, &receiveMsg,sizeof(char)*MSG_LENGTH) > 0){
-          printf("%s\n",receiveMsg);
-        } else {
-          perror ("[client]Eroare la read() de la server.\n");
+	    while(read (sd, &bytesReceived,sizeof(int)) > 0){
+        if (read(sd, &msgReceived,bytesReceived) <= 0){
+          perror ("[CLIENT]Eroare la read() de la server.\n");
           return errno;
         }
-        bzero(receiveMsg,sizeof(char)*MSG_LENGTH);
+        printf("Am primit de la server %s cu size %d\n",msgReceived,bytesReceived);
+        bzero(msgReceived,bytesReceived);
    		}
 		exit(0);
-
   }
 
   close (sd);

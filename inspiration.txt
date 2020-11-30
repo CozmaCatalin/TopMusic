@@ -3,6 +3,9 @@ https://technomanor.wordpress.com/2012/07/01/connect-c-with-mysql-database/
 SERVER-CLIENT:
 https://profs.info.uaic.ro/~computernetworks/files/NetEx/S12/
 
+GENERATE DATABSE:
+Mysql WorkBench
+
 
 HOW TO COMPILE:
 gcc <FILENAME>.c -o <FILENAME>.exe -lpthread `mysql_config --cflags --libs`
