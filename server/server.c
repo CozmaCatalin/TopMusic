@@ -18,6 +18,7 @@
 #include <signal.h>
 #include <pthread.h>
 #include "../database/database.h"
+#include "send.h"
 
 #define MSG_LENGTH 100
 
@@ -31,60 +32,30 @@ int ON=1;
 typedef struct Client{
 	int idThread;
 	int cl;
-	char ID[2];
 }Client;
 
 Client clients[10];
 int connectedClients = -1;
 
-		// for(int i = 0 ; i <= connectedClients ; i++){
-    //		sprintf(msg_to_send,"[%d]%s",clients[tdL.idThread].idThread,msg);
-		// 	if(clients[i].idThread == tdL.idThread) continue;
-		// 	if (write (clients[i].cl, &msg_to_send, sizeof(char)*MSG_LENGTH) <= 0){
-		// 		printf("[Client %d] ",tdL.idThread);
-		// 		perror ("Eroare la write() catre client.\n");
-		// 	}
-		// }
-
 static void *client_handler(void * arg){		
 	struct Client tdL; 
 	tdL = *((struct Client*)arg);	
 	char msgReceived[MSG_LENGTH];
-  char msgToSend[MSG_LENGTH];
-  int bytesMsgToSend;
   int bytesReceived;
-
 	while(read (tdL.cl, &bytesReceived,sizeof(int)) > 0){
 
     if (read(tdL.cl, &msgReceived,bytesReceived) <= 0){
       perror ("[SERVER]Eroare la read() de la client.\n");
       break;
     }
-
-    printf("[%d bytes]CLIENT SEND-> %s\n",bytesReceived,msgReceived);
-
-    sprintf(msgToSend,"[TEST]%s",msgReceived);
-    bytesMsgToSend = sizeof(char)*strlen(msgToSend);
-    printf("SENDING %s cu size %d\n",msgToSend,bytesMsgToSend);
-
-    // SENDING MESSAGE LENGTH BYTES
-    if (write (tdL.cl,&bytesMsgToSend,sizeof(int)) <= 0){
-      perror ("[SERVER]Eroare la write() bytes spre client.\n");
+    if(strcmp(msgReceived,"exit") == 0){
       break;
     }
-
-    // SENDING THE MESSAGE
-    if (write (tdL.cl,&msgToSend,bytesMsgToSend) <= 0){
-      perror ("[SERVER]Eroare la write() message spre client.\n");
-      break;
-    }
-
+    command_handler(tdL.cl,msgReceived);
     bzero(msgReceived,bytesReceived);
-    bzero(msgToSend,bytesMsgToSend);
-
-		fflush (stdout);		 
+    fflush(stdout);
 	}
-
+  printf("[%d]Client disconnected!\n",tdL.idThread);
 	pthread_detach(pthread_self());		
 	close ((intptr_t)arg);
 	return(NULL);	
