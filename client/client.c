@@ -14,7 +14,7 @@
 #include <string.h>
 #include <signal.h> 
 #include <mysql/mysql.h>
-
+#include "send.h"
 #define MSG_LENGTH 100
 
 /* codul de eroare returnat de anumite apeluri */
@@ -61,41 +61,15 @@ int main (int argc, char *argv[]){
       perror ("[client]Eroare la fork().\n");
       return errno;
   } else if(communications > 0){
-
 	  //--TRIMITEREA MESAJELOR--//
-		char sendMsg[MSG_LENGTH];
-    int bytesMsgToSend;
 	    while(1){
-        fgets(sendMsg,MSG_LENGTH,stdin);
-        sendMsg[strlen(sendMsg)-1] = '\0';
-        if(strlen(sendMsg) == 0){
-          printf("Please enter an message!\n");
-          continue;
-        }
-        
-        bytesMsgToSend = sizeof(char)*strlen(sendMsg);
-
-        // SENDING MESSAGE LENGTH BYTES
-        if (write (sd,&bytesMsgToSend,sizeof(int)) <= 0){
-          perror ("[CLIENT]Eroare la write() bytes spre server.\n");
-          return errno;
-        }
-
-        // SENDING THE MESSAGE
-        if (write (sd,&sendMsg,bytesMsgToSend) <= 0){
-          perror ("[CLIENT]Eroare la write() message spre server.\n");
-          return errno;
-        }
-
-        bzero(sendMsg,bytesMsgToSend);
+        send_msg(sd);
    		}
 
   } else if(communications == 0){
-
 		//--PRIMIREA MESAJELOR--//
     int bytesReceived;
 	  char msgReceived[MSG_LENGTH];
-
 		char receiveMsg[MSG_LENGTH];
 	    while(read (sd, &bytesReceived,sizeof(int)) > 0){
         if (read(sd, &msgReceived,bytesReceived) <= 0){
