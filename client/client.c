@@ -15,6 +15,7 @@
 #include <signal.h> 
 #include <mysql/mysql.h>
 #include "send.h"
+#include<signal.h>
 #define MSG_LENGTH 100
 
 /* codul de eroare returnat de anumite apeluri */
@@ -65,7 +66,6 @@ int main (int argc, char *argv[]){
 	    while(1){
         send_msg(sd);
    		}
-
   } else if(communications == 0){
 		//--PRIMIREA MESAJELOR--//
     int bytesReceived;
@@ -76,10 +76,13 @@ int main (int argc, char *argv[]){
           perror ("[CLIENT]Eroare la read() de la server.\n");
           return errno;
         }
-        printf("Am primit de la server %s cu size %d\n",msgReceived,bytesReceived);
+        if(strcmp(msgReceived,"exit")==0){
+          kill(getpid(),SIGINT);
+          break;
+        }
+        printf("%s\n",msgReceived);
         bzero(msgReceived,bytesReceived);
    		}
-		exit(0);
   }
 
   close (sd);

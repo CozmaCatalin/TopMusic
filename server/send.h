@@ -34,11 +34,20 @@ void send_msg(int cl,char msgToSend[]){
     fflush(stdout);
 }
 
+void login(int cl){
+  char msgToSend[100];
+  strcpy(msgToSend,"Login command!");
+  send_msg(cl,msgToSend);
+}
 
 void command_handler(int cl , char msgReceived[]){
-    char msgToSend[100];
-    sprintf(msgToSend,"[TEST]%s",msgReceived);
-    send_msg(cl,msgToSend);
+  char msgToSend[100];
+    if(strcmp(msgReceived,"login") == 0){
+      login(cl);
+    } else {
+      strcpy(msgToSend,"Incorrect command!");
+      send_msg(cl,msgToSend);
+    }
 }
 
 #endif

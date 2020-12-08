@@ -34,7 +34,6 @@ typedef struct Client{
 	int cl;
 }Client;
 
-Client clients[10];
 int connectedClients = -1;
 
 static void *client_handler(void * arg){		
@@ -49,6 +48,7 @@ static void *client_handler(void * arg){
       break;
     }
     if(strcmp(msgReceived,"exit") == 0){
+      send_msg(tdL.cl,msgReceived);
       break;
     }
     command_handler(tdL.cl,msgReceived);
@@ -59,7 +59,6 @@ static void *client_handler(void * arg){
 	pthread_detach(pthread_self());		
 	close ((intptr_t)arg);
 	return(NULL);	
-
 };
 
 
@@ -112,11 +111,8 @@ int main (){
       perror ("[server]Eroare la accept().\n");
       continue;
     }
-	    
+ 
 	  connectedClients++;
-	  clients[connectedClients].idThread = connectedClients;
-	  clients[connectedClients].cl = client;
-
 	  td= (struct Client*)malloc(sizeof(struct Client));	
 	  td->idThread=connectedClients;
 	  td->cl=client;
