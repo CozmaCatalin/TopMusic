@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <pthread.h>
+#include "../services/functions.h"
 
 #ifndef HELPERS_SERVER
 #define HELPERS_SERVER
@@ -42,7 +43,7 @@ void login(int cl){
 
 void command_handler(int cl , char msgReceived[]){
   char msgToSend[100];
-    if(strcmp(msgReceived,"login") == 0){
+    if(strcmp(getNWord(msgReceived,1),"login") == 0){
       login(cl);
     } else {
       strcpy(msgToSend,"Incorrect command!");

@@ -9,41 +9,55 @@
 #include <string.h>
 #include <signal.h> 
 #include <mysql/mysql.h>
-
+#include "../services/functions.h"
 #ifndef SEND_CLIENT
 #define SEND_CLIENT
 
-void send_msg(int sd){
-    char sendMsg[100];
-    fgets(sendMsg,100,stdin);
-    sendMsg[strlen(sendMsg)-1] = '\0';
-    int bytesMsgToSend = sizeof(char)*strlen(sendMsg);
-    
-    if(strlen(sendMsg) == 0){
+void send_msg(int sd, char msgToSend[]){
+    int bytesMsgToSend = sizeof(char)*strlen(msgToSend);
+    char msg[100]; 
+    sprintf(msg,"%s",msgToSend);    
+
+    if(strlen(msg) == 0){
         printf("Please enter an message!\n");
-        bzero(sendMsg,bytesMsgToSend);
+        bzero(msg,bytesMsgToSend);
         return;
     }
 
     // SENDING MESSAGE LENGTH BYTES
     if (write (sd,&bytesMsgToSend,sizeof(int)) <= 0){
         perror ("[CLIENT]Eroare la write() bytes spre server.\n");
-        bzero(sendMsg,bytesMsgToSend);
+        bzero(msg,bytesMsgToSend);
         return;
     }
 
     // SENDING THE MESSAGE
-    if (write (sd,&sendMsg,bytesMsgToSend) <= 0){
+    if (write (sd,&msg,bytesMsgToSend) <= 0){
         perror ("[CLIENT]Eroare la write() message spre server.\n");
-        bzero(sendMsg,bytesMsgToSend);
+        bzero(msg,bytesMsgToSend);
         return;
     }
 
-    if(strcmp(sendMsg,"exit")==0){
-        bzero(sendMsg,bytesMsgToSend);
+    if(strcmp(msg,"exit")==0){
+        bzero(msg,bytesMsgToSend);
         exit(0);
     }
     
-     bzero(sendMsg,bytesMsgToSend);
+     bzero(msg,bytesMsgToSend);
+}
+
+void login(int sd){
+    char username[100];
+    char password[100];
+    printf("=== LOGGIN IN ! ===");
+    printf("Username: ") ; fgets(username,100,stdin);
+}
+
+void commands_handler(int sd){
+    char msgToSend[100];
+    fgets(msgToSend,100,stdin);
+    msgToSend[strlen(msgToSend)-1] = '\0';
+    send_msg(sd,msgToSend);
+    bzero(msgToSend,100);
 }
 #endif

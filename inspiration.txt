@@ -8,4 +8,9 @@ Mysql WorkBench
 
 
 HOW TO COMPILE:
-gcc <FILENAME>.c -o <FILENAME>.exe -lpthread `mysql_config --cflags --libs`
+gcc client.c -o client.exe -lpthread `mysql_config --cflags --libs`
+gcc server.c -o server.exe -lpthread `mysql_config --cflags --libs`
+
+
+HELPERS
+https://stackoverflow.com/questions/4513316/split-string-in-c-every-white-space

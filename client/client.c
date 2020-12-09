@@ -64,7 +64,7 @@ int main (int argc, char *argv[]){
   } else if(communications > 0){
 	  //--TRIMITEREA MESAJELOR--//
 	    while(1){
-        send_msg(sd);
+        commands_handler(sd);
    		}
   } else if(communications == 0){
 		//--PRIMIREA MESAJELOR--//
