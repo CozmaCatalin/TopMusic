@@ -46,13 +46,6 @@ void send_msg(int sd, char msgToSend[]){
      bzero(msg,bytesMsgToSend);
 }
 
-void login(int sd){
-    char username[100];
-    char password[100];
-    printf("=== LOGGIN IN ! ===");
-    printf("Username: ") ; fgets(username,100,stdin);
-}
-
 void commands_handler(int sd){
     char msgToSend[100];
     fgets(msgToSend,100,stdin);

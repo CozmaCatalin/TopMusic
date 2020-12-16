@@ -32,6 +32,8 @@ int ON=1;
 typedef struct Client{
 	int idThread;
 	int cl;
+  int isLogged;
+  int isAdmin;
 }Client;
 
 int connectedClients = -1;
@@ -51,7 +53,7 @@ static void *client_handler(void * arg){
       send_msg(tdL.cl,msgReceived);
       break;
     }
-    command_handler(tdL.cl,msgReceived);
+    command_handler(tdL.cl,msgReceived,&tdL.isLogged);
     bzero(msgReceived,bytesReceived);
     fflush(stdout);
 	}
@@ -71,8 +73,7 @@ int main (){
   pthread_t th[100];
 
   connect_to_database();
-  get_tables();
-  close_connection();
+  // close_connection();
   
   if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1){
       perror ("[server]Eroare la socket().\n");
@@ -113,10 +114,11 @@ int main (){
     }
  
 	  connectedClients++;
-	  td= (struct Client*)malloc(sizeof(struct Client));	
+	  td = (struct Client*)malloc(sizeof(struct Client));	
 	  td->idThread=connectedClients;
 	  td->cl=client;
-	
+    td->isLogged = 0;
+    td->isAdmin = 0;
 	  pthread_create(&th[connectedClients], NULL, &client_handler, td);	      
 				
 	}   

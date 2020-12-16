@@ -14,9 +14,11 @@
 #define FUNCTIONS
 
 char* getNWord(char sentence[],int n){
+  char newSentence[100];
+  strcpy(newSentence,sentence);
   char * pch;
   int i = 0;
-  pch = strtok (sentence," ,.-");
+  pch = strtok (newSentence," ,.-");
   while (pch != NULL)
   {
     i++;
@@ -25,7 +27,7 @@ char* getNWord(char sentence[],int n){
     }
     pch = strtok (NULL, " ,.-");
   }
-  return "Sentence doesn't have this number of word";
+  return NULL;
 }
 
 #endif
