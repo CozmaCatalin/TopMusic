@@ -41,21 +41,190 @@ void close_connection(){
 int insert_new_user(char* username,char* password){
 	char s[1000];
 	sprintf(s,"INSERT INTO `client` (`user_name`,`password`,`first_name`,`last_name`,`age`,`is_admin`,`token`) VALUES ('%s','%s',' ', ' ' ,'10','0','-');",username,password);
-	return mysql_query(conn, s);
+	if (mysql_query(conn, s)) {
+      fprintf(stderr, "%s\n", mysql_error(conn));
+	  return 0;
+  	}
+	return 1;
 }
 
-int login_command(char* username, char* password){	
+int insert_song(char *name,char *description,char *artist, char *link){
 	char s[1000];
-	sprintf(s,"SELECT COUNT(*) FROM client WHERE user_name=\"%s\" AND password=\"%s\";",username,password);
-	printf("%s \n",s);	
+	sprintf(s,"INSERT INTO `music` (`name`,`description`,`artist`,`link`,`can_be_on_top`) VALUES ('%s','%s','%s','%s',1);",name,description,artist,link);
+	if (mysql_query(conn, s)) {
+      fprintf(stderr, "%s\n", mysql_error(conn));
+	  return 0;
+  	}
+	return 1;
+}
+
+int find_song(char *song_id){
+	char s[1000];
+	sprintf(s,"SELECT * FROM music WHERE id=\"%s\";",song_id);
+
 	if (mysql_query(conn, s)) {
 		fprintf(stderr, "%s\n", mysql_error(conn));
 		exit(1);
 	}
-	MYSQL_RES *res;
+
+	MYSQL_RES *result = mysql_store_result(conn);
+	printf("select %lld \n",mysql_num_rows(result));
+
+	if(mysql_num_rows(result) == 0){
+		return 0;
+	}
+	return 1;
+}
+
+int vote(int *user_id , char *song_id){
+	char s[1000];
+	sprintf(s,"INSERT INTO `votes` (`number`,`music_id`,`client_id`) VALUES (1,'%s','%d');",song_id,*(user_id));
+	if (mysql_query(conn, s)) {
+      fprintf(stderr, "%s\n", mysql_error(conn));
+	  return 0;
+  	}
+	return 1;
+}
+
+int unique_vote(int *user_id , char *song_id){
+	char s[1000];
+	sprintf(s,"SELECT * FROM votes WHERE client_id=\"%d\" AND music_id=\"%s\";",*(user_id),song_id);
+	printf("%s \n",s);	
+
+	if (mysql_query(conn, s)) {
+		fprintf(stderr, "%s\n", mysql_error(conn));
+		exit(1);
+	}
+
+	MYSQL_RES *result = mysql_store_result(conn);
+	if(mysql_num_rows(result) == 0){
+		return 1;
+	}
+
+	return 0;
+}
+
+int vote_dissable(char* user_id){
+	char s[1000];
+	sprintf(s,"UPDATE client SET can_vote=0 WHERE id=\"%s\";",user_id);
+	if (mysql_query(conn, s)) {
+      fprintf(stderr, "%s\n", mysql_error(conn));
+	  return 0;
+  	}
+	return 1;
+}
+
+int vote_enable(char* user_id){
+	char s[1000];
+	sprintf(s,"UPDATE client SET can_vote=1 WHERE id=\"%s\";",user_id);
+	if (mysql_query(conn, s)) {
+      fprintf(stderr, "%s\n", mysql_error(conn));
+	  return 0;
+  	}
+	return 1;
+}
+
+int user_can_vote(int *user_id){
+	char s[1000];
+	sprintf(s,"SELECT can_vote FROM client WHERE id=\"%d\";",*(user_id));
+	printf("%s \n",s);	
+
+	if (mysql_query(conn, s)) {
+		fprintf(stderr, "%s\n", mysql_error(conn));
+		exit(1);
+	}
+
+	MYSQL_RES *result = mysql_store_result(conn);
+	if(mysql_num_rows(result) == 0){
+		return 0;
+	}
+	MYSQL_ROW row;
+	row = mysql_fetch_row(result);
+	mysql_free_result(result);
+	printf("CAN VOTE %s\n",row[0]);
+	return atoi(row[0]);
+}
+
+int get_all_music(){
+	char s[1000];
+	sprintf(s,"SELECT * FROM music;");
+	if (mysql_query(conn, s)) {
+      fprintf(stderr, "%s\n", mysql_error(conn));
+	  return 0;
+  	}
+	MYSQL_RES *result = mysql_store_result(conn);
+	
+    if(mysql_num_rows(result) == 0){
+         return 0;
+    }
+
+	int num_fields = mysql_num_fields(result);    
+
 	MYSQL_ROW row;
 	
+	while ((row = mysql_fetch_row(result))) 
+	{ 
+		for(int i = 0; i < num_fields; i++) 
+		{ 
+			printf("%s ",row[i]);
+		} 
+		printf("\n");
+	}
+	
+	mysql_free_result(result);
 	return 1;
+}
+
+int get_top_music(){
+	char s[1000];
+	sprintf(s,"SELECT * FROM music;");
+	if (mysql_query(conn, s)) {
+      fprintf(stderr, "%s\n", mysql_error(conn));
+	  return 0;
+  	}
+	MYSQL_RES *result = mysql_store_result(conn);
+
+    if(mysql_num_rows(result) == 0){
+       return 0;
+    }
+
+	int num_fields = mysql_num_fields(result);    
+
+	MYSQL_ROW row;
+	
+	while ((row = mysql_fetch_row(result))) 
+	{ 
+		for(int i = 1; i < num_fields; i++) 
+		{ 
+			printf("%s ",row[i]);
+		} 
+		printf("\n");
+	}
+	
+	mysql_free_result(result);
+	return 1;
+}
+
+int login_command(char* username, char* password){	
+	char s[1000];
+	sprintf(s,"SELECT * FROM client WHERE user_name=\"%s\" AND password=\"%s\";",username,password);
+	printf("%s \n",s);	
+
+	if (mysql_query(conn, s)) {
+		fprintf(stderr, "%s\n", mysql_error(conn));
+		exit(1);
+	}
+
+	MYSQL_RES *result = mysql_store_result(conn);
+	printf("select %lld \n",mysql_num_rows(result));
+
+	if(mysql_num_rows(result) == 0){
+		return 0;
+	}
+	MYSQL_ROW row;
+	row = mysql_fetch_row(result);
+	mysql_free_result(result);
+	return atoi(row[0]);
 }
 
 void get_tables(){

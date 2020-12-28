@@ -18,14 +18,14 @@ char* getNWord(char sentence[],int n){
   strcpy(newSentence,sentence);
   char * pch;
   int i = 0;
-  pch = strtok (newSentence," ,.-");
+  pch = strtok (newSentence," ");
   while (pch != NULL)
   {
     i++;
     if( i == n){
         return pch;
     }
-    pch = strtok (NULL, " ,.-");
+    pch = strtok (NULL, " ");
   }
   return NULL;
 }
