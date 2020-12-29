@@ -228,7 +228,7 @@ const char* get_all_music(){
 
 const char* get_top_music(){
 	char s[1000];
-	sprintf(s,"SELECT music.id,music.name,music.description,music.artist,music.link,SUM(votes.number)/COUNT(*) FROM music INNER JOIN votes ON music.id = votes.music_id GROUP BY music.id ORDER BY SUM(votes.number)/COUNT(*) DESC;");
+	sprintf(s,"SELECT music.id,music.name,music.description,music.artist,music.link,SUM(votes.number)/COUNT(*) FROM music INNER JOIN votes ON music.id = votes.music_id WHERE music.can_be_on_top = 1 GROUP BY music.id ORDER BY SUM(votes.number)/COUNT(*) DESC;");
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
       return mysql_error(conn);
