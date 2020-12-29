@@ -83,12 +83,16 @@ void song_insert(int cl,char *name,char *description,char *artist, char *link){
   send_msg(cl,msgToSend);
 }
 
-void all_music(){
-  get_all_music();
+void all_music(int cl){
+  char msgToSend[10000];
+  strcpy(msgToSend,get_all_music());
+  send_msg(cl,msgToSend);
 }
 
-void top_music(){
-  get_top_music();
+void top_music(int cl){
+  char msgToSend[10000];
+  strcpy(msgToSend,get_top_music());
+  send_msg(cl,msgToSend);
 }
 
 void vote_song(int cl,char* song_id,int* user_id){
@@ -152,11 +156,13 @@ void command_handler(int cl , char msgReceived[], int* isLogged, int *isAdmin){
         char *artist = getNWord(msgReceived,4); char *link = getNWord(msgReceived,5);
         song_insert(cl,name,description,artist,link);
       } else if(strcmp(getNWord(msgReceived,1),"music") == 0){
-        all_music();
+        all_music(cl);
       } else if(strcmp(getNWord(msgReceived,1),"top") == 0){
-        top_music();
+        top_music(cl);
       } else if(strcmp(getNWord(msgReceived,1),"vote") == 0){
         vote_song(cl,getNWord(msgReceived,2),isLogged);
+
+        // === ADMIN COMMANDS === //
       } else if(strcmp(getNWord(msgReceived,1),"user_dissable") == 0 && *(isAdmin) == 1){
         vote_set(cl,getNWord(msgReceived,2),0);
       } else if(strcmp(getNWord(msgReceived,1),"user_enable") == 0 && *(isAdmin) == 1){

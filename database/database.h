@@ -164,7 +164,7 @@ int user_can_vote(int *user_id){
 	return atoi(row[0]);
 }
 
-int get_all_music(){
+const char* get_all_music(){
 	char s[1000];
 	sprintf(s,"SELECT * FROM music;");
 	if (mysql_query(conn, s)) {
@@ -174,27 +174,29 @@ int get_all_music(){
 	MYSQL_RES *result = mysql_store_result(conn);
 	
     if(mysql_num_rows(result) == 0){
-         return 0;
+        return "Something went wrong!\n";
     }
 
 	int num_fields = mysql_num_fields(result);    
 
 	MYSQL_ROW row;
 	
+	char* all_music = malloc(sizeof(char)*10000);
+
 	while ((row = mysql_fetch_row(result))) 
 	{ 
 		for(int i = 0; i < num_fields-1; i++) 
 		{ 
-			printf("%s ",row[i]);
+			sprintf(all_music,"%s %s",all_music,row[i]);
 		} 
-		printf("\n");
+		sprintf(all_music,"%s\n",all_music);
 	}
 	
 	mysql_free_result(result);
-	return 1;
+	return all_music;
 }
 
-int get_top_music(){
+const char* get_top_music(){
 	char s[1000];
 	sprintf(s,"SELECT * FROM music;");
 	if (mysql_query(conn, s)) {
@@ -202,26 +204,28 @@ int get_top_music(){
 	  return 0;
   	}
 	MYSQL_RES *result = mysql_store_result(conn);
-
+	
     if(mysql_num_rows(result) == 0){
-       return 0;
+        return "Something went wrong!\n";
     }
 
 	int num_fields = mysql_num_fields(result);    
 
 	MYSQL_ROW row;
 	
+	char* all_music = malloc(sizeof(char)*10000);
+
 	while ((row = mysql_fetch_row(result))) 
 	{ 
 		for(int i = 0; i < num_fields-1; i++) 
 		{ 
-			printf("%s ",row[i]);
+			sprintf(all_music,"%s %s",all_music,row[i]);
 		} 
-		printf("\n");
+		sprintf(all_music,"%s\n",all_music);
 	}
 	
 	mysql_free_result(result);
-	return 1;
+	return all_music;
 }
 
 int login_command(char* username, char* password, int *isAdmin){	
@@ -236,7 +240,7 @@ int login_command(char* username, char* password, int *isAdmin){
 	if(mysql_num_rows(result) == 0){
 		return 0;
 	}
-	
+
 	MYSQL_ROW row;
 	row = mysql_fetch_row(result);
 	mysql_free_result(result);
