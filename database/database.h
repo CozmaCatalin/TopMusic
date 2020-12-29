@@ -198,15 +198,15 @@ const char* get_all_music(){
 
 const char* get_top_music(){
 	char s[1000];
-	sprintf(s,"SELECT * FROM music;");
+	sprintf(s,"SELECT music.id,music.name,music.description,music.artist,music.link,COUNT(*) FROM music INNER JOIN votes ON music.id = votes.music_id GROUP BY music.id ORDER BY COUNT(*) DESC;");
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
-	  return 0;
+      return mysql_error(conn);
   	}
 	MYSQL_RES *result = mysql_store_result(conn);
 	
     if(mysql_num_rows(result) == 0){
-        return "Something went wrong!\n";
+        return "No result!\n";
     }
 
 	int num_fields = mysql_num_fields(result);    
@@ -214,16 +214,46 @@ const char* get_top_music(){
 	MYSQL_ROW row;
 	
 	char* all_music = malloc(sizeof(char)*10000);
-
+	sprintf(all_music,"\n");
 	while ((row = mysql_fetch_row(result))) 
 	{ 
-		for(int i = 0; i < num_fields-1; i++) 
-		{ 
-			sprintf(all_music,"%s %s",all_music,row[i]);
-		} 
-		sprintf(all_music,"%s\n",all_music);
+		sprintf(all_music,"%sName: %s\nDescription: %s\nArtist: %s\nLink: %s\nVotes: %s\nTypes:",all_music,row[1],row[2],row[3],row[4],row[5]);
+
+		// GETTING TYPES OF MUSIC
+		sprintf(s,"SELECT m.name,t.name from music as m INNER JOIN music_has_types as mt ON m.id = mt.music_id INNER JOIN types as t ON mt.types_id = t.id WHERE m.id=%s;",row[0]);
+		if (mysql_query(conn, s)) {
+			fprintf(stderr, "%s\n", mysql_error(conn));
+        	return mysql_error(conn);
+		}
+		MYSQL_RES *result1 = mysql_store_result(conn);
+		if(mysql_num_rows(result1) == 0){
+        	sprintf(all_music,"%s No Type",all_music);
+    	} else {
+			MYSQL_ROW row1;
+			while ((row1 = mysql_fetch_row(result1))){
+				sprintf(all_music,"%s %s",all_music,row1[1]);
+			}
+		}
+
+		//GETTING COMMENTS 
+		sprintf(all_music,"%s\nComments:\n",all_music);
+		sprintf(s,"SELECT c.text , u.user_name FROM client AS u INNER JOIN comments AS c ON c.client_id = u.id WHERE c.music_id =%s;",row[0]);
+		if (mysql_query(conn, s)) {
+			fprintf(stderr, "%s\n", mysql_error(conn));
+        	return mysql_error(conn);
+		}
+		MYSQL_RES *result2 = mysql_store_result(conn);
+		if(mysql_num_rows(result2) == 0){
+        	sprintf(all_music,"%sNo comments",all_music);
+    	} else {
+			MYSQL_ROW row2;
+			while ((row2 = mysql_fetch_row(result2))){
+				sprintf(all_music,"%s%s: %s\n",all_music,row2[1],row2[0]);
+			}
+		}
+
+		sprintf(all_music,"%s\n\n",all_music);
 	}
-	
 	mysql_free_result(result);
 	return all_music;
 }
