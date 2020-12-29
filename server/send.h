@@ -88,7 +88,7 @@ void all_music(){
 }
 
 void top_music(){
-
+  get_top_music();
 }
 
 void vote_song(int cl,char* song_id,int* user_id){
@@ -108,24 +108,34 @@ void vote_song(int cl,char* song_id,int* user_id){
   send_msg(cl,msgToSend);
 }
 
-// TODO -> Verify if user exists
-void dissable_vote(int cl,char* user_id){
+void vote_set(int cl,char* user_id,int vote_case){
   char msgToSend[1000];
   if(user_id == NULL){
-    strcpy(msgToSend,"Incorect command ! => dissable [user_id]");
-  } else if(vote_dissable(user_id) == 1){
-    sprintf(msgToSend,"User %s can't vote now!",user_id);
+    strcpy(msgToSend,"Incorect command ! => user_enable/user_dissable [user_id]");
+  } else if(find_user(user_id) == 0){
+    strcpy(msgToSend,"User doesn't exist !");
+  } else if(set_vote(user_id,vote_case) == 1){
+    if(vote_case == 1){
+      sprintf(msgToSend,"User %s can vote now!",user_id);
+    } else {
+      sprintf(msgToSend,"User %s can't vote now!",user_id);
+    }
   }
   send_msg(cl,msgToSend);
 }
 
-// TODO -> Verify if user exists
-void enable_vote(int cl,char* user_id){
+void song_set(int cl,char* song_id,int song_case){
   char msgToSend[1000];
-  if(user_id == NULL){
-    strcpy(msgToSend,"Incorect command ! => enable [user_id]");
-  } else if(vote_enable(user_id) == 1){
-    sprintf(msgToSend,"User %s can vote now!",user_id);
+  if(song_id == NULL){
+    strcpy(msgToSend,"Incorect command ! => song_enable/song_dissable [song_id]");
+  } else if(find_song(song_id) == 0){
+    strcpy(msgToSend,"Song doesn't exist !");
+  } else if(set_song(song_id,song_case) == 1){
+    if(song_case == 1){
+      sprintf(msgToSend,"Song %s can be on top now!",song_id);
+    } else {
+      sprintf(msgToSend,"Song %s can't be on top now!",song_id);
+    }
   }
   send_msg(cl,msgToSend);
 }
@@ -145,13 +155,17 @@ void command_handler(int cl , char msgReceived[], int* isLogged){
       } else if(strcmp(getNWord(msgReceived,1),"music") == 0){
         all_music();
       } else if(strcmp(getNWord(msgReceived,1),"top") == 0){
-
+        top_music();
       } else if(strcmp(getNWord(msgReceived,1),"vote") == 0){
         vote_song(cl,getNWord(msgReceived,2),isLogged);
-      } else if(strcmp(getNWord(msgReceived,1),"dissable") == 0){
-        dissable_vote(cl,getNWord(msgReceived,2));
-      } else if(strcmp(getNWord(msgReceived,1),"enable") == 0){
-        enable_vote(cl,getNWord(msgReceived,2));
+      } else if(strcmp(getNWord(msgReceived,1),"user_dissable") == 0){
+        vote_set(cl,getNWord(msgReceived,2),0);
+      } else if(strcmp(getNWord(msgReceived,1),"user_enable") == 0){
+        vote_set(cl,getNWord(msgReceived,2),1);
+      } else if(strcmp(getNWord(msgReceived,1),"song_dissable") == 0){
+        song_set(cl,getNWord(msgReceived,2),0);
+      } else if(strcmp(getNWord(msgReceived,1),"song_enable") == 0){
+        song_set(cl,getNWord(msgReceived,2),1);
       } else {
         strcpy(msgToSend,"Incorrect login command!\n");
         send_msg(cl,msgToSend);

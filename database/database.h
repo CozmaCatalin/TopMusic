@@ -76,6 +76,25 @@ int find_song(char *song_id){
 	return 1;
 }
 
+
+int find_user(char *user_id){
+	char s[1000];
+	sprintf(s,"SELECT * FROM client WHERE id=\"%s\";",user_id);
+
+	if (mysql_query(conn, s)) {
+		fprintf(stderr, "%s\n", mysql_error(conn));
+		exit(1);
+	}
+
+	MYSQL_RES *result = mysql_store_result(conn);
+	printf("select %lld \n",mysql_num_rows(result));
+
+	if(mysql_num_rows(result) == 0){
+		return 0;
+	}
+	return 1;
+}
+
 int vote(int *user_id , char *song_id){
 	char s[1000];
 	sprintf(s,"INSERT INTO `votes` (`number`,`music_id`,`client_id`) VALUES (1,'%s','%d');",song_id,*(user_id));
@@ -104,9 +123,9 @@ int unique_vote(int *user_id , char *song_id){
 	return 0;
 }
 
-int vote_dissable(char* user_id){
+int set_vote(char* user_id , int vote_case){
 	char s[1000];
-	sprintf(s,"UPDATE client SET can_vote=0 WHERE id=\"%s\";",user_id);
+	sprintf(s,"UPDATE client SET can_vote=%d WHERE id=\"%s\";",vote_case,user_id);
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
 	  return 0;
@@ -114,9 +133,9 @@ int vote_dissable(char* user_id){
 	return 1;
 }
 
-int vote_enable(char* user_id){
+int set_song(char* song_id , int song_case){
 	char s[1000];
-	sprintf(s,"UPDATE client SET can_vote=1 WHERE id=\"%s\";",user_id);
+	sprintf(s,"UPDATE music SET can_be_on_top=%d WHERE id=\"%s\";",song_case,song_id);
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
 	  return 0;
