@@ -95,10 +95,12 @@ void top_music(int cl){
   send_msg(cl,msgToSend);
 }
 
-void vote_song(int cl,char* song_id,int* user_id){
+void vote_song(int cl,char* song_id,char* value,int* user_id){
   char msgToSend[1000];
-  if(song_id == NULL){
-    strcpy(msgToSend,"Incorect command ! => vote [song_id]");
+  if(song_id == NULL || value == NULL){
+    strcpy(msgToSend,"Incorect command ! => vote [song_id] [value]");
+  } else if(atoi(value) < 1 || atoi(value) > 5){
+    strcpy(msgToSend,"Value must be between 1 and 5!");
   } else if(find_song(song_id) == 0){
     strcpy(msgToSend,"Music doesn't exist!");
   } else if(user_can_vote(user_id) == 0){
@@ -106,8 +108,23 @@ void vote_song(int cl,char* song_id,int* user_id){
   } else if(unique_vote(user_id,song_id) == 0){
     strcpy(msgToSend,"You already voted this song!");
   } else {
-    vote(user_id,song_id);
+    vote(user_id,song_id,value);
     strcpy(msgToSend,"Song voted!");
+  }
+  send_msg(cl,msgToSend);
+}
+
+void comment_song(int cl,char* song_id,char* text,int* user_id){
+  char msgToSend[1000];
+  if(song_id == NULL || text == NULL){
+    strcpy(msgToSend,"Incorect command ! => comment [song_id] [text]");
+  } else if(strlen(text) == 0){
+    strcpy(msgToSend,"Text can't be empty!");
+  } else if(find_song(song_id) == 0){
+    strcpy(msgToSend,"Music doesn't exist!");
+  } else {
+    comment(user_id,song_id,text);
+    strcpy(msgToSend,"Comment added!");
   }
   send_msg(cl,msgToSend);
 }
@@ -159,8 +176,10 @@ void command_handler(int cl , char msgReceived[], int* isLogged, int *isAdmin){
         all_music(cl);
       } else if(strcmp(getNWord(msgReceived,1),"top") == 0){
         top_music(cl);
+      } else if(strcmp(getNWord(msgReceived,1),"comment") == 0){
+        comment_song(cl,getNWord(msgReceived,2),getNWord(msgReceived,3),isLogged);
       } else if(strcmp(getNWord(msgReceived,1),"vote") == 0){
-        vote_song(cl,getNWord(msgReceived,2),isLogged);
+        vote_song(cl,getNWord(msgReceived,2),getNWord(msgReceived,3),isLogged);
 
         // === ADMIN COMMANDS === //
       } else if(strcmp(getNWord(msgReceived,1),"user_dissable") == 0 && *(isAdmin) == 1){

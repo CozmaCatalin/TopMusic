@@ -95,9 +95,19 @@ int find_user(char *user_id){
 	return 1;
 }
 
-int vote(int *user_id , char *song_id){
+int vote(int *user_id , char *song_id,char* value){
 	char s[1000];
-	sprintf(s,"INSERT INTO `votes` (`number`,`music_id`,`client_id`) VALUES (1,'%s','%d');",song_id,*(user_id));
+	sprintf(s,"INSERT INTO `votes` (`number`,`music_id`,`client_id`) VALUES ('%s','%s','%d');",value,song_id,*(user_id));
+	if (mysql_query(conn, s)) {
+      fprintf(stderr, "%s\n", mysql_error(conn));
+	  return 0;
+  	}
+	return 1;
+}
+
+int comment(int *user_id , char *song_id,char* text){
+	char s[1000];
+	sprintf(s,"INSERT INTO `comments` (`text`,`client_id`,`music_id`) VALUES ('%s','%d','%s');",text,*(user_id),song_id);
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
 	  return 0;
@@ -198,7 +208,7 @@ const char* get_all_music(){
 
 const char* get_top_music(){
 	char s[1000];
-	sprintf(s,"SELECT music.id,music.name,music.description,music.artist,music.link,COUNT(*) FROM music INNER JOIN votes ON music.id = votes.music_id GROUP BY music.id ORDER BY COUNT(*) DESC;");
+	sprintf(s,"SELECT music.id,music.name,music.description,music.artist,music.link,SUM(votes.number)/COUNT(*) FROM music INNER JOIN votes ON music.id = votes.music_id GROUP BY music.id ORDER BY SUM(votes.number)/COUNT(*) DESC;");
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
       return mysql_error(conn);
@@ -217,7 +227,7 @@ const char* get_top_music(){
 	sprintf(all_music,"\n");
 	while ((row = mysql_fetch_row(result))) 
 	{ 
-		sprintf(all_music,"%sName: %s\nDescription: %s\nArtist: %s\nLink: %s\nVotes: %s\nTypes:",all_music,row[1],row[2],row[3],row[4],row[5]);
+		sprintf(all_music,"%sId: %s\nName: %s\nDescription: %s\nArtist: %s\nLink: %s\nVote: %s\nTypes:",all_music,row[0],row[1],row[2],row[3],row[4],row[5]);
 
 		// GETTING TYPES OF MUSIC
 		sprintf(s,"SELECT m.name,t.name from music as m INNER JOIN music_has_types as mt ON m.id = mt.music_id INNER JOIN types as t ON mt.types_id = t.id WHERE m.id=%s;",row[0]);
@@ -236,7 +246,7 @@ const char* get_top_music(){
 		}
 
 		//GETTING COMMENTS 
-		sprintf(all_music,"%s\nComments:\n",all_music);
+		sprintf(all_music,"%s\n\nComments:\n",all_music);
 		sprintf(s,"SELECT c.text , u.user_name FROM client AS u INNER JOIN comments AS c ON c.client_id = u.id WHERE c.music_id =%s;",row[0]);
 		if (mysql_query(conn, s)) {
 			fprintf(stderr, "%s\n", mysql_error(conn));
@@ -252,7 +262,7 @@ const char* get_top_music(){
 			}
 		}
 
-		sprintf(all_music,"%s\n\n",all_music);
+		sprintf(all_music,"%s--------------------------------------------\n\n",all_music);
 	}
 	mysql_free_result(result);
 	return all_music;
