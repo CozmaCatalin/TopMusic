@@ -194,38 +194,6 @@ int user_can_vote(int *user_id){
 	return atoi(row[0]);
 }
 
-const char* get_all_music(){
-	char s[1000];
-	sprintf(s,"SELECT * FROM music;");
-	if (mysql_query(conn, s)) {
-      fprintf(stderr, "%s\n", mysql_error(conn));
-	  return 0;
-  	}
-	MYSQL_RES *result = mysql_store_result(conn);
-	
-    if(mysql_num_rows(result) == 0){
-        return "Something went wrong!\n";
-    }
-
-	int num_fields = mysql_num_fields(result);    
-
-	MYSQL_ROW row;
-	
-	char* all_music = malloc(sizeof(char)*10000);
-
-	while ((row = mysql_fetch_row(result))) 
-	{ 
-		for(int i = 0; i < num_fields-1; i++) 
-		{ 
-			sprintf(all_music,"%s %s",all_music,row[i]);
-		} 
-		sprintf(all_music,"%s\n",all_music);
-	}
-	
-	mysql_free_result(result);
-	return all_music;
-}
-
 const char* get_top_music(){
 	char s[1000];
 	sprintf(s,"SELECT music.id,music.name,music.description,music.artist,music.link,SUM(votes.number)/COUNT(*) FROM music INNER JOIN votes ON music.id = votes.music_id WHERE music.can_be_on_top = 1 GROUP BY music.id ORDER BY SUM(votes.number)/COUNT(*) DESC;");

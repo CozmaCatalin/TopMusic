@@ -83,12 +83,6 @@ void song_insert(int cl,char *name,char *description,char *artist, char *link){
   send_msg(cl,msgToSend);
 }
 
-void all_music(int cl){
-  char msgToSend[10000];
-  strcpy(msgToSend,get_all_music());
-  send_msg(cl,msgToSend);
-}
-
 void top_music(int cl){
   char msgToSend[10000];
   strcpy(msgToSend,get_top_music());
@@ -184,8 +178,6 @@ void command_handler(int cl , char msgReceived[], int* isLogged, int *isAdmin){
         char *name = getNWord(msgReceived,2); char *description = getNWord(msgReceived,3);
         char *artist = getNWord(msgReceived,4); char *link = getNWord(msgReceived,5);
         song_insert(cl,name,description,artist,link);
-      } else if(strcmp(getNWord(msgReceived,1),"music") == 0){
-        all_music(cl);
       } else if(strcmp(getNWord(msgReceived,1),"top") == 0){
         top_music(cl);
       } else if(strcmp(getNWord(msgReceived,1),"comment") == 0){
