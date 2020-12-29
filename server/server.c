@@ -53,7 +53,7 @@ static void *client_handler(void * arg){
       send_msg(tdL.cl,msgReceived);
       break;
     }
-    command_handler(tdL.cl,msgReceived,&tdL.isLogged);
+    command_handler(tdL.cl,msgReceived,&tdL.isLogged,&tdL.isAdmin);
     bzero(msgReceived,bytesReceived);
     fflush(stdout);
 	}

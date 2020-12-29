@@ -36,13 +36,13 @@ void send_msg(int cl,char msgToSend[]){
     fflush(stdout);
 }
 
-void login(int cl,char* username,char* password,int* isLogged){
+void login(int cl,char* username,char* password,int* isLogged, int *isAdmin){
   char msgToSend[1000];
   printf("processing [username]%s [pass]%s\n",username,password);
   if( username == NULL || password == NULL){
     strcpy(msgToSend,"Please enter an username and password !");
   } else {
-    int user_id = login_command(username,password);
+    int user_id = login_command(username,password,isAdmin);
     if(user_id != 0){
       strcpy(msgToSend,"Login succesfully!");
       *(isLogged) = user_id;
@@ -140,9 +140,8 @@ void song_set(int cl,char* song_id,int song_case){
   send_msg(cl,msgToSend);
 }
 
-void command_handler(int cl , char msgReceived[], int* isLogged){
+void command_handler(int cl , char msgReceived[], int* isLogged, int *isAdmin){
     char msgToSend[1000];
-
     // === LOGGED COMMANDS === ///
     if(*(isLogged) != 0){
       if(strcmp(msgReceived,"help") == 0){
@@ -158,13 +157,13 @@ void command_handler(int cl , char msgReceived[], int* isLogged){
         top_music();
       } else if(strcmp(getNWord(msgReceived,1),"vote") == 0){
         vote_song(cl,getNWord(msgReceived,2),isLogged);
-      } else if(strcmp(getNWord(msgReceived,1),"user_dissable") == 0){
+      } else if(strcmp(getNWord(msgReceived,1),"user_dissable") == 0 && *(isAdmin) == 1){
         vote_set(cl,getNWord(msgReceived,2),0);
-      } else if(strcmp(getNWord(msgReceived,1),"user_enable") == 0){
+      } else if(strcmp(getNWord(msgReceived,1),"user_enable") == 0 && *(isAdmin) == 1){
         vote_set(cl,getNWord(msgReceived,2),1);
-      } else if(strcmp(getNWord(msgReceived,1),"song_dissable") == 0){
+      } else if(strcmp(getNWord(msgReceived,1),"song_dissable") == 0 && *(isAdmin) == 1){
         song_set(cl,getNWord(msgReceived,2),0);
-      } else if(strcmp(getNWord(msgReceived,1),"song_enable") == 0){
+      } else if(strcmp(getNWord(msgReceived,1),"song_enable") == 0 && *(isAdmin) == 1){
         song_set(cl,getNWord(msgReceived,2),1);
       } else {
         strcpy(msgToSend,"Incorrect login command!\n");
@@ -174,7 +173,7 @@ void command_handler(int cl , char msgReceived[], int* isLogged){
     // === NON LOGGED COMMANDS === ///
     } else {
       if(strcmp(getNWord(msgReceived,1),"login") == 0){
-        login(cl,getNWord(msgReceived,2),getNWord(msgReceived,3),isLogged);
+        login(cl,getNWord(msgReceived,2),getNWord(msgReceived,3),isLogged,isAdmin);
       } else if(strcmp(getNWord(msgReceived,1),"register") == 0){
         _register(cl,getNWord(msgReceived,2),getNWord(msgReceived,3));
       } else if(strcmp(msgReceived,"help") == 0){

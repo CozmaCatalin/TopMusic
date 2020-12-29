@@ -183,7 +183,7 @@ int get_all_music(){
 	
 	while ((row = mysql_fetch_row(result))) 
 	{ 
-		for(int i = 0; i < num_fields; i++) 
+		for(int i = 0; i < num_fields-1; i++) 
 		{ 
 			printf("%s ",row[i]);
 		} 
@@ -213,7 +213,7 @@ int get_top_music(){
 	
 	while ((row = mysql_fetch_row(result))) 
 	{ 
-		for(int i = 1; i < num_fields; i++) 
+		for(int i = 0; i < num_fields-1; i++) 
 		{ 
 			printf("%s ",row[i]);
 		} 
@@ -224,25 +224,23 @@ int get_top_music(){
 	return 1;
 }
 
-int login_command(char* username, char* password){	
+int login_command(char* username, char* password, int *isAdmin){	
 	char s[1000];
 	sprintf(s,"SELECT * FROM client WHERE user_name=\"%s\" AND password=\"%s\";",username,password);
-	printf("%s \n",s);	
-
 	if (mysql_query(conn, s)) {
 		fprintf(stderr, "%s\n", mysql_error(conn));
 		exit(1);
 	}
 
 	MYSQL_RES *result = mysql_store_result(conn);
-	printf("select %lld \n",mysql_num_rows(result));
-
 	if(mysql_num_rows(result) == 0){
 		return 0;
 	}
+	
 	MYSQL_ROW row;
 	row = mysql_fetch_row(result);
 	mysql_free_result(result);
+	*(isAdmin) = atoi(row[6]);
 	return atoi(row[0]);
 }
 
