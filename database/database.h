@@ -153,6 +153,26 @@ int set_song(char* song_id , int song_case){
 	return 1;
 }
 
+int delete_song(char* song_id){
+	char s[1000];
+	sprintf(s,"DELETE FROM comments WHERE music_id=\"%s\";",song_id);
+	if (mysql_query(conn, s)) {
+      fprintf(stderr, "%s\n", mysql_error(conn));
+	  return 0;
+  	}
+	sprintf(s,"DELETE FROM votes WHERE music_id=\"%s\";",song_id);
+	if (mysql_query(conn, s)) {
+      fprintf(stderr, "%s\n", mysql_error(conn));
+	  return 0;
+  	}
+	sprintf(s,"DELETE FROM music WHERE id=\"%s\";",song_id);
+	if (mysql_query(conn, s)) {
+      fprintf(stderr, "%s\n", mysql_error(conn));
+	  return 0;
+  	}
+	return 1;
+}
+
 int user_can_vote(int *user_id){
 	char s[1000];
 	sprintf(s,"SELECT can_vote FROM client WHERE id=\"%d\";",*(user_id));

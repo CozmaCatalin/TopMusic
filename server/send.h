@@ -161,6 +161,18 @@ void song_set(int cl,char* song_id,int song_case){
   send_msg(cl,msgToSend);
 }
 
+void song_delete(int cl,char* song_id){
+  char msgToSend[1000];
+  if(song_id == NULL){
+    strcpy(msgToSend,"Incorect command ! => song_delete [song_id]");
+  } else if(find_song(song_id) == 0){
+    strcpy(msgToSend,"Song doesn't exist !");
+  } else if(delete_song(song_id) == 1){
+    sprintf(msgToSend,"Song %s deleted!",song_id);
+  }
+  send_msg(cl,msgToSend);
+}
+
 void command_handler(int cl , char msgReceived[], int* isLogged, int *isAdmin){
     char msgToSend[1000];
     // === LOGGED COMMANDS === ///
@@ -190,6 +202,8 @@ void command_handler(int cl , char msgReceived[], int* isLogged, int *isAdmin){
         song_set(cl,getNWord(msgReceived,2),0);
       } else if(strcmp(getNWord(msgReceived,1),"song_enable") == 0 && *(isAdmin) == 1){
         song_set(cl,getNWord(msgReceived,2),1);
+      } else if(strcmp(getNWord(msgReceived,1),"song_delete") == 0 && *(isAdmin) == 1){
+        song_delete(cl,getNWord(msgReceived,2));
       } else {
         strcpy(msgToSend,"Incorrect login command!\n");
         send_msg(cl,msgToSend);
