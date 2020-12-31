@@ -72,7 +72,9 @@ void song_insert(int cl,char *name,char *description,char *artist, char *link,in
   char msgToSend[1000];
   printf("processing [%s] [%s] [%s] [%s] \n",name,description,artist,link);
   if( name == NULL || description == NULL || artist == NULL || link == NULL ){
-    strcpy(msgToSend,"Incoret insert ! => insert [name] [description] [artist] [link] !");
+    strcpy(msgToSend,"Incoret insert ! => insert [name] [description] [artist] [link] [type-1] [type-2] ... [type-n] !");
+  } else if(numberOfTypes == 0){
+    strcpy(msgToSend,"Please insert at least 1 type!");
   } else {
     if(insert_song(name,description,artist,link,idOfTypes,numberOfTypes) == 1){
       strcpy(msgToSend,"Song inserted!");
@@ -172,7 +174,7 @@ void command_handler(int cl , char msgReceived[], int* isLogged, int *isAdmin){
     // === LOGGED COMMANDS === ///
     if(*(isLogged) != 0){
       if(strcmp(msgReceived,"help") == 0){
-        strcpy(msgToSend,"Available commands: \n insert [name] [description] [artist] [link] (insert a new song in database \n)");
+        strcpy(msgToSend,"Available commands: \n insert [name] [description] [artist] [link] [type-1] [type-2] ... [type-n] (insert a new song in database \n)");
         send_msg(cl,msgToSend);
       } else if(strcmp(getNWord(msgReceived,1),"insert") == 0){
         char *name = getNWord(msgReceived,2); char *description = getNWord(msgReceived,3);

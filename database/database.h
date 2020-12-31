@@ -79,12 +79,10 @@ int insert_song(char *name,char *description,char *artist, char *link,int idOfTy
 int find_song(char *song_id){
 	char s[1000];
 	sprintf(s,"SELECT * FROM music WHERE id=\"%s\";",song_id);
-
 	if (mysql_query(conn, s)) {
 		fprintf(stderr, "%s\n", mysql_error(conn));
 		exit(1);
 	}
-
 	MYSQL_RES *result = mysql_store_result(conn);
 	printf("select %lld \n",mysql_num_rows(result));
 
@@ -220,7 +218,7 @@ int user_can_vote(int *user_id){
 
 const char* get_top_music(){
 	char s[1000];
-	sprintf(s,"SELECT music.id,music.name,music.description,music.artist,music.link,SUM(votes.number)/COUNT(*) FROM music LEFT OUTER JOIN votes ON music.id = votes.music_id WHERE music.can_be_on_top = 1 GROUP BY music.id ORDER BY SUM(votes.number)/COUNT(*) DESC;");
+	sprintf(s,"SELECT music.id,music.name,music.description,music.artist,music.link, IFNULL(SUM(votes.number)/COUNT(*),0) FROM music LEFT OUTER JOIN votes ON music.id = votes.music_id WHERE music.can_be_on_top = 1 GROUP BY music.id ORDER BY SUM(votes.number)/COUNT(*) DESC;");
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
       return mysql_error(conn);
@@ -266,7 +264,7 @@ const char* get_top_music(){
 		}
 		MYSQL_RES *result2 = mysql_store_result(conn);
 		if(mysql_num_rows(result2) == 0){
-        	sprintf(all_music,"%sNo comments",all_music);
+        	sprintf(all_music,"%sNo comments\n",all_music);
     	} else {
 			MYSQL_ROW row2;
 			while ((row2 = mysql_fetch_row(result2))){
