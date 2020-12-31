@@ -14,7 +14,7 @@
 #define FUNCTIONS
 
 char* getNWord(char sentence[],int n){
-  char newSentence[100];
+  char newSentence[1000];
   strcpy(newSentence,sentence);
   char * pch;
   int i = 0;
@@ -29,5 +29,20 @@ char* getNWord(char sentence[],int n){
   }
   return NULL;
 }
+
+int getNumberOfWords(char sentence[]){
+  char newSentence[1000];
+  strcpy(newSentence,sentence);
+  char * pch;
+  int i = 0;
+  pch = strtok (newSentence," ");
+  while (pch != NULL)
+  {
+    i++;
+    pch = strtok (NULL, " ");
+  }
+  return i;
+}
+
 
 #endif

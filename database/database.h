@@ -48,13 +48,31 @@ int insert_new_user(char* username,char* password){
 	return 1;
 }
 
-int insert_song(char *name,char *description,char *artist, char *link){
+int insert_song(char *name,char *description,char *artist, char *link,int idOfTypes[],int numberOfTypes){
 	char s[1000];
 	sprintf(s,"INSERT INTO `music` (`name`,`description`,`artist`,`link`,`can_be_on_top`) VALUES ('%s','%s','%s','%s',1);",name,description,artist,link);
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
 	  return 0;
   	}
+	sprintf(s,"SELECT id FROM music WHERE id = (SELECT MAX(id) FROM music);");
+	if (mysql_query(conn, s)) {
+      fprintf(stderr, "%s\n", mysql_error(conn));
+	  return 0;
+  	}
+	MYSQL_RES *result = mysql_store_result(conn);
+	MYSQL_ROW row;
+	row = mysql_fetch_row(result);
+	for(int i = 0 ; i < numberOfTypes ; i++){
+		printf("%d ", idOfTypes[i]);
+		sprintf(s,"INSERT INTO `music_has_types` (`music_id`,`types_id`) VALUES(%s,%d);",row[0],idOfTypes[i]);
+		printf("%s\n",s);
+		if (mysql_query(conn, s)) {
+			fprintf(stderr, "%s\n", mysql_error(conn));
+			return 0;
+		}
+	}
+
 	return 1;
 }
 
@@ -155,6 +173,12 @@ int set_song(char* song_id , int song_case){
 
 int delete_song(char* song_id){
 	char s[1000];
+	sprintf(s,"DELETE FROM music_has_types WHERE music_id=\"%s\";",song_id);
+	if (mysql_query(conn, s)) {
+      fprintf(stderr, "%s\n", mysql_error(conn));
+	  return 0;
+  	}
+
 	sprintf(s,"DELETE FROM comments WHERE music_id=\"%s\";",song_id);
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
@@ -196,7 +220,7 @@ int user_can_vote(int *user_id){
 
 const char* get_top_music(){
 	char s[1000];
-	sprintf(s,"SELECT music.id,music.name,music.description,music.artist,music.link,SUM(votes.number)/COUNT(*) FROM music INNER JOIN votes ON music.id = votes.music_id WHERE music.can_be_on_top = 1 GROUP BY music.id ORDER BY SUM(votes.number)/COUNT(*) DESC;");
+	sprintf(s,"SELECT music.id,music.name,music.description,music.artist,music.link,SUM(votes.number)/COUNT(*) FROM music LEFT OUTER JOIN votes ON music.id = votes.music_id WHERE music.can_be_on_top = 1 GROUP BY music.id ORDER BY SUM(votes.number)/COUNT(*) DESC;");
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
       return mysql_error(conn);

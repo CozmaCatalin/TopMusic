@@ -68,13 +68,13 @@ void _register(int cl,char* username,char* password){
   send_msg(cl,msgToSend);
 }
 
-void song_insert(int cl,char *name,char *description,char *artist, char *link){
+void song_insert(int cl,char *name,char *description,char *artist, char *link,int idOfTypes[],int numberOfTypes){
   char msgToSend[1000];
   printf("processing [%s] [%s] [%s] [%s] \n",name,description,artist,link);
   if( name == NULL || description == NULL || artist == NULL || link == NULL ){
     strcpy(msgToSend,"Incoret insert ! => insert [name] [description] [artist] [link] !");
   } else {
-    if(insert_song(name,description,artist,link) == 1){
+    if(insert_song(name,description,artist,link,idOfTypes,numberOfTypes) == 1){
       strcpy(msgToSend,"Song inserted!");
     } else {
       strcpy(msgToSend,"Something went wrong! Please try again.");
@@ -177,7 +177,12 @@ void command_handler(int cl , char msgReceived[], int* isLogged, int *isAdmin){
       } else if(strcmp(getNWord(msgReceived,1),"insert") == 0){
         char *name = getNWord(msgReceived,2); char *description = getNWord(msgReceived,3);
         char *artist = getNWord(msgReceived,4); char *link = getNWord(msgReceived,5);
-        song_insert(cl,name,description,artist,link);
+        int numberOfTypes = getNumberOfWords(msgReceived) - 5;
+        int idOfTypes[100];
+        for(int i = 0 ; i < numberOfTypes ; i++){
+          idOfTypes[i] = atoi(getNWord(msgReceived,6+i));
+        }
+        song_insert(cl,name,description,artist,link,idOfTypes,numberOfTypes);
       } else if(strcmp(getNWord(msgReceived,1),"top") == 0){
         top_music(cl);
       } else if(strcmp(getNWord(msgReceived,1),"comment") == 0){
