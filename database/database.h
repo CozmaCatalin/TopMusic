@@ -92,6 +92,22 @@ int find_song(char *song_id){
 	return 1;
 }
 
+int find_type_db(char *name){
+	char s[1000];
+	sprintf(s,"SELECT * FROM types WHERE name=\"%s\";",name);
+	if (mysql_query(conn, s)) {
+		fprintf(stderr, "%s\n", mysql_error(conn));
+		exit(1);
+	}
+	MYSQL_RES *result = mysql_store_result(conn);
+	printf("select %lld \n",mysql_num_rows(result));
+
+	if(mysql_num_rows(result) == 0){
+		return 0;
+	}
+	return 1;
+}
+
 
 int find_user(char *user_id){
 	char s[1000];
@@ -216,9 +232,49 @@ int user_can_vote(int *user_id){
 	return atoi(row[0]);
 }
 
-const char* get_top_music(){
+const char* get_all_types(){
 	char s[1000];
-	sprintf(s,"SELECT music.id,music.name,music.description,music.artist,music.link, IFNULL(SUM(votes.number)/COUNT(*),0) FROM music LEFT OUTER JOIN votes ON music.id = votes.music_id WHERE music.can_be_on_top = 1 GROUP BY music.id ORDER BY SUM(votes.number)/COUNT(*) DESC;");
+	sprintf(s,"SELECT * FROM types;");
+	if (mysql_query(conn, s)) {
+      fprintf(stderr, "%s\n", mysql_error(conn));
+      return mysql_error(conn);
+  	}
+	MYSQL_RES *result = mysql_store_result(conn);
+	
+    if(mysql_num_rows(result) == 0){
+        return "No result!\n";
+    }
+
+	int num_fields = mysql_num_fields(result);    
+
+	MYSQL_ROW row;
+	
+	char* all_types = malloc(sizeof(char)*10000);
+	sprintf(all_types,"=== ALL TYPES ===\n");
+	while ((row = mysql_fetch_row(result))) {
+		sprintf(all_types,"%s\nId:%s Name:%s",all_types,row[0],row[1]);
+	} 
+	return all_types;
+}
+
+int insert_type_db(char* name){
+	char s[1000];
+	sprintf(s,"INSERT INTO `types` (`name`) VALUES ('%s');",name);
+	if (mysql_query(conn, s)) {
+      fprintf(stderr, "%s\n", mysql_error(conn));
+	  return 0;
+  	}
+	return 1;
+}
+
+const char* get_top_music(char* type){
+	printf("[TOP BY] %s\n",type);
+	char s[1000];
+	if(type == NULL){
+		sprintf(s,"SELECT music.id,music.name,music.description,music.artist,music.link, IFNULL(SUM(votes.number)/COUNT(*),0) FROM music LEFT OUTER JOIN votes ON music.id = votes.music_id WHERE music.can_be_on_top = 1 GROUP BY music.id ORDER BY SUM(votes.number)/COUNT(*) DESC;");
+	} else {
+		sprintf(s,"SELECT  music.id,music.name,music.description,music.artist,music.link, IFNULL(SUM(votes.number)/COUNT(*),0)  FROM music  LEFT OUTER JOIN votes  ON music.id = votes.music_id  LEFT OUTER JOIN music_has_types ON music.id = music_has_types.music_id WHERE music.can_be_on_top = 1 AND music_has_types.types_id = %s GROUP BY music.id  ORDER BY SUM(votes.number)/COUNT(*) DESC;",type);
+	}
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
       return mysql_error(conn);

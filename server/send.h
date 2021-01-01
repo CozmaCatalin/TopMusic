@@ -85,9 +85,9 @@ void song_insert(int cl,char *name,char *description,char *artist, char *link,in
   send_msg(cl,msgToSend);
 }
 
-void top_music(int cl){
+void top_music(int cl,char* type){
   char msgToSend[10000];
-  strcpy(msgToSend,get_top_music());
+  strcpy(msgToSend,get_top_music(type));
   send_msg(cl,msgToSend);
 }
 
@@ -169,6 +169,25 @@ void song_delete(int cl,char* song_id){
   send_msg(cl,msgToSend);
 }
 
+void types(int cl){
+  char msgToSend[10000];
+  strcpy(msgToSend,get_all_types());
+  send_msg(cl,msgToSend);
+}
+
+void insert_type(int cl, char* name){
+  char msgToSend[100];
+  if(name == NULL){
+    strcpy(msgToSend,"Incorect command ! => insert_type [name]");
+  } else if(find_type_db(name) == 1){
+    strcpy(msgToSend,"Type already exist !");
+  } else {
+    insert_type_db(name);
+    sprintf(msgToSend,"Type %s inserted!",name);
+  }
+  send_msg(cl,msgToSend);
+}
+
 void command_handler(int cl , char msgReceived[], int* isLogged, int *isAdmin){
     char msgToSend[1000];
     // === LOGGED COMMANDS === ///
@@ -186,7 +205,11 @@ void command_handler(int cl , char msgReceived[], int* isLogged, int *isAdmin){
         }
         song_insert(cl,name,description,artist,link,idOfTypes,numberOfTypes);
       } else if(strcmp(getNWord(msgReceived,1),"top") == 0){
-        top_music(cl);
+        top_music(cl,getNWord(msgReceived,2));
+      } else if(strcmp(getNWord(msgReceived,1),"types") == 0){
+        types(cl);
+      } else if(strcmp(getNWord(msgReceived,1),"insert_type") == 0){
+        insert_type(cl,getNWord(msgReceived,2));
       } else if(strcmp(getNWord(msgReceived,1),"comment") == 0){
         comment_song(cl,getNWord(msgReceived,2),getNWord(msgReceived,3),isLogged);
       } else if(strcmp(getNWord(msgReceived,1),"vote") == 0){
