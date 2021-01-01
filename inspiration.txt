@@ -8,8 +8,8 @@ Mysql WorkBench
 
 
 HOW TO COMPILE:
-gcc client.c -o client.exe -lpthread `mysql_config --cflags --libs`
-gcc server.c -o server.exe -lpthread `mysql_config --cflags --libs`
+cd client && gcc client.c -o client.exe -lpthread `mysql_config --cflags --libs`
+cd server gcc server.c -o server.exe -lpthread `mysql_config --cflags --libs`
 
 
 HELPERS

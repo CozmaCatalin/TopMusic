@@ -64,7 +64,6 @@ int insert_song(char *name,char *description,char *artist, char *link,int idOfTy
 	MYSQL_ROW row;
 	row = mysql_fetch_row(result);
 	for(int i = 0 ; i < numberOfTypes ; i++){
-		printf("%d ", idOfTypes[i]);
 		sprintf(s,"INSERT INTO `music_has_types` (`music_id`,`types_id`) VALUES(%s,%d);",row[0],idOfTypes[i]);
 		printf("%s\n",s);
 		if (mysql_query(conn, s)) {
@@ -328,7 +327,7 @@ const char* get_top_music(char* type){
 			}
 		}
 
-		sprintf(all_music,"%s--------------------------------------------\n\n",all_music);
+		sprintf(all_music,"%s----------------------------------------------------------------------\n\n",all_music);
 	}
 	mysql_free_result(result);
 	return all_music;
