@@ -12,10 +12,11 @@
 #include "../services/functions.h"
 #ifndef SEND_CLIENT
 #define SEND_CLIENT
+const int MSG_LENGTH = 10000;
 
 void send_msg(int sd, char msgToSend[]){
     int bytesMsgToSend = sizeof(char)*strlen(msgToSend);
-    char msg[100]; 
+    char msg[MSG_LENGTH]; 
     sprintf(msg,"%s",msgToSend);    
 
     if(strlen(msg) == 0){
@@ -47,10 +48,10 @@ void send_msg(int sd, char msgToSend[]){
 }
 
 void commands_handler(int sd){
-    char msgToSend[100];
-    fgets(msgToSend,100,stdin);
+    char msgToSend[MSG_LENGTH];
+    fgets(msgToSend,MSG_LENGTH,stdin);
     msgToSend[strlen(msgToSend)-1] = '\0';
     send_msg(sd,msgToSend);
-    bzero(msgToSend,100);
+    bzero(msgToSend,MSG_LENGTH);
 }
 #endif

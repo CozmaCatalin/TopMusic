@@ -13,6 +13,7 @@
 
 #ifndef DATABASE
 #define DATABASE
+const int QUERRY_LENGTH = 10000;
 
 const char *SHOW_TABLES = "show tables";
 
@@ -39,7 +40,7 @@ void close_connection(){
 }
 
 int insert_new_user(char* username,char* password){
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	sprintf(s,"INSERT INTO `client` (`user_name`,`password`,`first_name`,`last_name`,`age`,`is_admin`,`token`) VALUES ('%s','%s',' ', ' ' ,'10','0','-');",username,password);
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
@@ -48,8 +49,24 @@ int insert_new_user(char* username,char* password){
 	return 1;
 }
 
+int verif_gen(int id){
+	char s[QUERRY_LENGTH];
+	sprintf(s,"SELECT * FROM types WHERE id=\"%d\";",id);
+	if (mysql_query(conn, s)) {
+		fprintf(stderr, "%s\n", mysql_error(conn));
+		exit(1);
+	}
+	MYSQL_RES *result = mysql_store_result(conn);
+	printf("select %lld \n",mysql_num_rows(result));
+
+	if(mysql_num_rows(result) == 0){
+		return 0;
+	}
+	return 1;
+}
+
 int insert_song(char *name,char *description,char *artist, char *link,int idOfTypes[],int numberOfTypes){
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	sprintf(s,"INSERT INTO `music` (`name`,`description`,`artist`,`link`,`can_be_on_top`) VALUES ('%s','%s','%s','%s',1);",name,description,artist,link);
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
@@ -64,11 +81,15 @@ int insert_song(char *name,char *description,char *artist, char *link,int idOfTy
 	MYSQL_ROW row;
 	row = mysql_fetch_row(result);
 	for(int i = 0 ; i < numberOfTypes ; i++){
-		sprintf(s,"INSERT INTO `music_has_types` (`music_id`,`types_id`) VALUES(%s,%d);",row[0],idOfTypes[i]);
-		printf("%s\n",s);
-		if (mysql_query(conn, s)) {
-			fprintf(stderr, "%s\n", mysql_error(conn));
-			return 0;
+		if(verif_gen(idOfTypes[i]) == 1){
+			sprintf(s,"INSERT INTO `music_has_types` (`music_id`,`types_id`) VALUES(%s,%d);",row[0],idOfTypes[i]);
+			printf("%s\n",s);
+			if (mysql_query(conn, s)) {
+				fprintf(stderr, "%s\n", mysql_error(conn));
+				return 0;
+			}
+		} else {
+			printf("Type %d doesn't exist!\n",idOfTypes[i]);
 		}
 	}
 
@@ -76,7 +97,7 @@ int insert_song(char *name,char *description,char *artist, char *link,int idOfTy
 }
 
 int find_song(char *song_id){
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	sprintf(s,"SELECT * FROM music WHERE id=\"%s\";",song_id);
 	if (mysql_query(conn, s)) {
 		fprintf(stderr, "%s\n", mysql_error(conn));
@@ -91,8 +112,9 @@ int find_song(char *song_id){
 	return 1;
 }
 
+
 int find_type_db(char *name){
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	sprintf(s,"SELECT * FROM types WHERE name=\"%s\";",name);
 	if (mysql_query(conn, s)) {
 		fprintf(stderr, "%s\n", mysql_error(conn));
@@ -109,7 +131,7 @@ int find_type_db(char *name){
 
 
 int find_user(char *user_id){
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	sprintf(s,"SELECT * FROM client WHERE id=\"%s\";",user_id);
 
 	if (mysql_query(conn, s)) {
@@ -127,7 +149,7 @@ int find_user(char *user_id){
 }
 
 int vote(int *user_id , char *song_id,char* value){
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	sprintf(s,"INSERT INTO `votes` (`number`,`music_id`,`client_id`) VALUES ('%s','%s','%d');",value,song_id,*(user_id));
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
@@ -137,7 +159,7 @@ int vote(int *user_id , char *song_id,char* value){
 }
 
 int comment(int *user_id , char *song_id,char* text){
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	sprintf(s,"INSERT INTO `comments` (`text`,`client_id`,`music_id`) VALUES ('%s','%d','%s');",text,*(user_id),song_id);
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
@@ -147,7 +169,7 @@ int comment(int *user_id , char *song_id,char* text){
 }
 
 int unique_vote(int *user_id , char *song_id){
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	sprintf(s,"SELECT * FROM votes WHERE client_id=\"%d\" AND music_id=\"%s\";",*(user_id),song_id);
 	printf("%s \n",s);	
 
@@ -165,7 +187,7 @@ int unique_vote(int *user_id , char *song_id){
 }
 
 int set_vote(char* user_id , int vote_case){
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	sprintf(s,"UPDATE client SET can_vote=%d WHERE id=\"%s\";",vote_case,user_id);
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
@@ -175,7 +197,7 @@ int set_vote(char* user_id , int vote_case){
 }
 
 int set_song(char* song_id , int song_case){
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	sprintf(s,"UPDATE music SET can_be_on_top=%d WHERE id=\"%s\";",song_case,song_id);
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
@@ -185,7 +207,7 @@ int set_song(char* song_id , int song_case){
 }
 
 int delete_song(char* song_id){
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	sprintf(s,"DELETE FROM music_has_types WHERE music_id=\"%s\";",song_id);
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
@@ -211,7 +233,7 @@ int delete_song(char* song_id){
 }
 
 int user_can_vote(int *user_id){
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	sprintf(s,"SELECT can_vote FROM client WHERE id=\"%d\";",*(user_id));
 	printf("%s \n",s);	
 
@@ -232,7 +254,7 @@ int user_can_vote(int *user_id){
 }
 
 const char* get_all_types(){
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	sprintf(s,"SELECT * FROM types;");
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
@@ -248,7 +270,7 @@ const char* get_all_types(){
 
 	MYSQL_ROW row;
 	
-	char* all_types = malloc(sizeof(char)*10000);
+	char* all_types = malloc(sizeof(char)*QUERRY_LENGTH);
 	sprintf(all_types,"=== ALL TYPES ===\n");
 	while ((row = mysql_fetch_row(result))) {
 		sprintf(all_types,"%s\nId:%s Name:%s",all_types,row[0],row[1]);
@@ -257,7 +279,7 @@ const char* get_all_types(){
 }
 
 int insert_type_db(char* name){
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	sprintf(s,"INSERT INTO `types` (`name`) VALUES ('%s');",name);
 	if (mysql_query(conn, s)) {
       fprintf(stderr, "%s\n", mysql_error(conn));
@@ -268,7 +290,7 @@ int insert_type_db(char* name){
 
 const char* get_top_music(char* type){
 	printf("[TOP BY] %s\n",type);
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	if(type == NULL){
 		sprintf(s,"SELECT music.id,music.name,music.description,music.artist,music.link, IFNULL(SUM(votes.number)/COUNT(*),0) FROM music LEFT OUTER JOIN votes ON music.id = votes.music_id WHERE music.can_be_on_top = 1 GROUP BY music.id ORDER BY SUM(votes.number)/COUNT(*) DESC;");
 	} else {
@@ -288,7 +310,7 @@ const char* get_top_music(char* type){
 
 	MYSQL_ROW row;
 	
-	char* all_music = malloc(sizeof(char)*10000);
+	char* all_music = malloc(sizeof(char)*QUERRY_LENGTH);
 	sprintf(all_music,"\n");
 	while ((row = mysql_fetch_row(result))) 
 	{ 
@@ -334,7 +356,7 @@ const char* get_top_music(char* type){
 }
 
 int login_command(char* username, char* password, int *isAdmin){	
-	char s[1000];
+	char s[QUERRY_LENGTH];
 	sprintf(s,"SELECT * FROM client WHERE user_name=\"%s\" AND password=\"%s\";",username,password);
 	if (mysql_query(conn, s)) {
 		fprintf(stderr, "%s\n", mysql_error(conn));

@@ -10,13 +10,16 @@
 #include <pthread.h>
 #include "../services/functions.h"
 #include "../database/database.h"
-
+const int MSG_LENGTH = 10000;
 #ifndef HELPERS_SERVER
 #define HELPERS_SERVER
 
+const char* NORMAL_USER_COMMANDS = "AVAILABLE COMMANDS: \n\nexit (disconnect)\ninsert [name] [description] [artist] [link] [type-1] [type-2] ... [type-n] (insert a new song in database)\ntop (get top music)\ntop [type_id] (get top music by type)\ntypes (get current types)\ninsert_type [name] (insert new type in data base)\ncomment [song_id] [text] (add comment to song)\nvote [song_id] [number] (add vote to a song)\n";
+const char* ADMIN_COMMANDS = "AVAILABLE COMMANDS: \n\nexit (disconnect)\ninsert [name] [description] [artist] [link] [type-1] [type-2] ... [type-n] (insert a new song in database)\ntop (get top music)\ntop [type_id] (get top music by type)\ntypes (get current types)\ninsert_type [name] (insert new type in data base)\ncomment [song_id] [text] (add comment to song)\nvote [song_id] [number] (add vote to a song)\nuser_dissable [user_id] (dissable user vote capability)\nuser_enable [user_id] (enable user vote capability)\nsong_dissable [song_id] (song can't be on top)\nsong_enable [song_id] (song can be on top)\nsong_delete [song_id] (delete song)\n";
+
 void send_msg(int cl,char msgToSend[]){
     int bytesMsgToSend = sizeof(char)*strlen(msgToSend);
-    char msg[1000]; sprintf(msg,"%s",msgToSend);
+    char msg[MSG_LENGTH]; sprintf(msg,"%s",msgToSend);
     printf("SENDING %s cu size %d\n",msgToSend,bytesMsgToSend);
     
     // SENDING MESSAGE LENGTH BYTES
@@ -37,7 +40,7 @@ void send_msg(int cl,char msgToSend[]){
 }
 
 void login(int cl,char* username,char* password,int* isLogged, int *isAdmin){
-  char msgToSend[1000];
+  char msgToSend[MSG_LENGTH];
   printf("processing [username]%s [pass]%s\n",username,password);
   if( username == NULL || password == NULL){
     strcpy(msgToSend,"Please enter an username and password !");
@@ -54,7 +57,7 @@ void login(int cl,char* username,char* password,int* isLogged, int *isAdmin){
 }
 
 void _register(int cl,char* username,char* password){
-  char msgToSend[1000];
+  char msgToSend[MSG_LENGTH];
   printf("processing [username]%s [pass]%s\n",username,password);
   if( username == NULL || password == NULL){
     strcpy(msgToSend,"Please enter an username and password !");
@@ -69,7 +72,7 @@ void _register(int cl,char* username,char* password){
 }
 
 void song_insert(int cl,char *name,char *description,char *artist, char *link,int idOfTypes[],int numberOfTypes){
-  char msgToSend[1000];
+  char msgToSend[MSG_LENGTH];
   printf("processing [%s] [%s] [%s] [%s] \n",name,description,artist,link);
   if( name == NULL || description == NULL || artist == NULL || link == NULL ){
     strcpy(msgToSend,"Incoret insert ! => insert [name] [description] [artist] [link] [type-1] [type-2] ... [type-n] !");
@@ -86,13 +89,13 @@ void song_insert(int cl,char *name,char *description,char *artist, char *link,in
 }
 
 void top_music(int cl,char* type){
-  char msgToSend[10000];
+  char msgToSend[MSG_LENGTH];
   strcpy(msgToSend,get_top_music(type));
   send_msg(cl,msgToSend);
 }
 
 void vote_song(int cl,char* song_id,char* value,int* user_id){
-  char msgToSend[1000];
+  char msgToSend[MSG_LENGTH];
   if(song_id == NULL || value == NULL){
     strcpy(msgToSend,"Incorect command ! => vote [song_id] [value]");
   } else if(atoi(value) < 1 || atoi(value) > 5){
@@ -111,7 +114,7 @@ void vote_song(int cl,char* song_id,char* value,int* user_id){
 }
 
 void comment_song(int cl,char* song_id,char* text,int* user_id){
-  char msgToSend[1000];
+  char msgToSend[MSG_LENGTH];
   if(song_id == NULL || text == NULL){
     strcpy(msgToSend,"Incorect command ! => comment [song_id] [text]");
   } else if(strlen(text) == 0){
@@ -126,7 +129,7 @@ void comment_song(int cl,char* song_id,char* text,int* user_id){
 }
 
 void vote_set(int cl,char* user_id,int vote_case){
-  char msgToSend[1000];
+  char msgToSend[MSG_LENGTH];
   if(user_id == NULL){
     strcpy(msgToSend,"Incorect command ! => user_enable/user_dissable [user_id]");
   } else if(find_user(user_id) == 0){
@@ -142,7 +145,7 @@ void vote_set(int cl,char* user_id,int vote_case){
 }
 
 void song_set(int cl,char* song_id,int song_case){
-  char msgToSend[1000];
+  char msgToSend[MSG_LENGTH];
   if(song_id == NULL){
     strcpy(msgToSend,"Incorect command ! => song_enable/song_dissable [song_id]");
   } else if(find_song(song_id) == 0){
@@ -158,7 +161,7 @@ void song_set(int cl,char* song_id,int song_case){
 }
 
 void song_delete(int cl,char* song_id){
-  char msgToSend[1000];
+  char msgToSend[MSG_LENGTH];
   if(song_id == NULL){
     strcpy(msgToSend,"Incorect command ! => song_delete [song_id]");
   } else if(find_song(song_id) == 0){
@@ -170,13 +173,13 @@ void song_delete(int cl,char* song_id){
 }
 
 void types(int cl){
-  char msgToSend[10000];
+  char msgToSend[MSG_LENGTH];
   strcpy(msgToSend,get_all_types());
   send_msg(cl,msgToSend);
 }
 
 void insert_type(int cl, char* name){
-  char msgToSend[100];
+  char msgToSend[MSG_LENGTH];
   if(name == NULL){
     strcpy(msgToSend,"Incorect command ! => insert_type [name]");
   } else if(find_type_db(name) == 1){
@@ -189,11 +192,15 @@ void insert_type(int cl, char* name){
 }
 
 void command_handler(int cl , char msgReceived[], int* isLogged, int *isAdmin){
-    char msgToSend[1000];
+    char msgToSend[MSG_LENGTH];
     // === LOGGED COMMANDS === ///
     if(*(isLogged) != 0){
       if(strcmp(msgReceived,"help") == 0){
-        strcpy(msgToSend,"Available commands: \n insert [name] [description] [artist] [link] [type-1] [type-2] ... [type-n] (insert a new song in database \n)");
+        if(*(isAdmin) == 1){
+          strcpy(msgToSend,ADMIN_COMMANDS);
+        } else {
+          strcpy(msgToSend,NORMAL_USER_COMMANDS);
+        }
         send_msg(cl,msgToSend);
       } else if(strcmp(getNWord(msgReceived,1),"insert") == 0){
         char *name = getNWord(msgReceived,2); char *description = getNWord(msgReceived,3);
@@ -227,7 +234,7 @@ void command_handler(int cl , char msgReceived[], int* isLogged, int *isAdmin){
       } else if(strcmp(getNWord(msgReceived,1),"song_delete") == 0 && *(isAdmin) == 1){
         song_delete(cl,getNWord(msgReceived,2));
       } else {
-        strcpy(msgToSend,"Incorrect login command!\n");
+        strcpy(msgToSend,"Command doesn't exist! Type help to see available commands\n");
         send_msg(cl,msgToSend);
       }
 
@@ -238,7 +245,7 @@ void command_handler(int cl , char msgReceived[], int* isLogged, int *isAdmin){
       } else if(strcmp(getNWord(msgReceived,1),"register") == 0){
         _register(cl,getNWord(msgReceived,2),getNWord(msgReceived,3));
       } else if(strcmp(msgReceived,"help") == 0){
-        strcpy(msgToSend,"Available commands: \n login [username] [password] \n register [username] [password])\0");
+        strcpy(msgToSend,"Available commands:\nlogin [username] [password] \nregister [username] [password])\0");
         send_msg(cl,msgToSend);
       } else {
         strcpy(msgToSend,"Please login or register!\n");
