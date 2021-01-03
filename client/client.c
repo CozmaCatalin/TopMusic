@@ -20,7 +20,7 @@
 
 /* codul de eroare returnat de anumite apeluri */
 extern int errno;
-
+int is_connection = 0;
 /* portul de conectare la server*/
 int port;
 
@@ -57,13 +57,14 @@ int main (int argc, char *argv[]){
   }
   
   communications = fork();
+  is_connection = 1;
 
   if(communications < 0){
       perror ("[client]Eroare la fork().\n");
       return errno;
   } else if(communications > 0){
 	  //--TRIMITEREA MESAJELOR--//
-	    while(1){
+	    while(is_connection){
         commands_handler(sd);
    		}
   } else if(communications == 0){
@@ -83,6 +84,8 @@ int main (int argc, char *argv[]){
         printf("%s\n",msgReceived);
         bzero(msgReceived,bytesReceived);
    		}
+      printf("Something went wrong with the server !\n");
+      kill(getppid(),SIGINT);
   }
 
   close (sd);
