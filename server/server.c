@@ -73,7 +73,6 @@ int main (){
   pthread_t th[100];
 
   connect_to_database();
-  // close_connection();
   
   if ((sd = socket (AF_INET, SOCK_STREAM, 0)) == -1){
       perror ("[server]Eroare la socket().\n");

@@ -352,6 +352,7 @@ const char* get_top_music(char* type){
 		sprintf(all_music,"%s----------------------------------------------------------------------\n\n",all_music);
 	}
 	mysql_free_result(result);
+	all_music[sizeof(char)*strlen(all_music)] = 0;
 	return all_music;
 }
 
