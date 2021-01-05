@@ -31,7 +31,6 @@ int main (int argc, char *argv[]){
   int nr=0;
   char buf[10];
   pid_t communications;
-  printf("MySQL client version: %s\n", mysql_get_client_info());
   /* exista toate argumentele in linia de comanda? */
   if (argc != 3){
       printf ("Sintaxa: %s <SERVER_ADDRESS> <PORT>\n", argv[0]);
@@ -55,10 +54,9 @@ int main (int argc, char *argv[]){
       perror ("[client]Eroare la connect().\n");
       return errno;
   }
-  
+  printf("Welcome to TOP MUSIC!\n");
   communications = fork();
   is_connection = 1;
-
   if(communications < 0){
       perror ("[client]Eroare la fork().\n");
       return errno;

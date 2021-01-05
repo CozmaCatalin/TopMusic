@@ -105,13 +105,13 @@ int main (){
     Client * td;   
     int length = sizeof (from);
 
-    printf ("[server]Asteptam la portul %d...\n",PORT);
-    fflush (stdout);
-
     if ((client = accept (sd, (struct sockaddr *) &from, &length)) < 0){
       perror ("[server]Eroare la accept().\n");
       continue;
     }
+
+    printf ("New client connected !\n");
+    fflush (stdout);
  
 	  connectedClients++;
 	  td = (struct Client*)malloc(sizeof(struct Client));	
